@@ -8,17 +8,16 @@ autoconf-archive
 btrfs-progs
 egl-wayland
 git
-gst-plugin-pipewire
+pipewire-gstreamer
 gtk4-layer-shell
 htop
 intltool
 iwd
-java-21-openjdk
+java-latest-openjdk
 pulseaudio-libs-devel
 sassc
 snapper
-webp-pixbuf-loader
-wget
+wget2
 zram-generator
 
 # Omitted/handled by Fedora:

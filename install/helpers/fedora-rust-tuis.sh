@@ -97,7 +97,7 @@ install_cargo_tool wiremix 0.9.0 || true
 echo
 echo "Summary of actions:"
 echo "- Identified System: Fedora ${FEDORA_RELEASE} on ${CPU_ARCH}."
-echo "- Tried COPR: nclundell/fedora-extras (with fedora-43-aarch64 fallback on Asahi Fedora 42)."
+echo "- Tried COPR: nclundell/fedora-extras (falls back to a previous-release aarch64 chroot on Asahi releases without a native build)."
 if rpm -q bluetui >/dev/null 2>&1; then
   echo "- Installed Package: $(rpm -q bluetui)."
 else

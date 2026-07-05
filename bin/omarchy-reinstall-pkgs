@@ -1,14 +1,16 @@
 #!/bin/bash
 set -e
 
-# Reinstall all default Omarchy packages from the stable channel and downgrade any packages that are too new.
+# Reinstall all default Omarchy packages from the Fedora package list.
 
-# Set the package repository to the stable mirrors
-omarchy-refresh-pacman
+OMARCHY_PATH="${OMARCHY_PATH:-$HOME/.local/share/omarchy}"
+package_file="$OMARCHY_PATH/install/omarchy-base.packages.fedora"
 
-# Downgrade any packages to the stable setup
-sudo pacman -Suu --noconfirm
+# Read package names, skipping comments, blanks, and the optional-section marker.
+mapfile -t packages < <(grep -vE '^#|^$|^OPTIONAL:$' "$package_file")
 
-# Ensure all packages are installed
-mapfile -t packages < <(grep -v '^#' "$OMARCHY_PATH/install/omarchy-base.packages" | grep -v '^$')
-sudo pacman -Syu --noconfirm --needed "${packages[@]}"
+echo "Reinstalling ${#packages[@]} packages via dnf..."
+
+# --allowerasing lets the Hyprland (lionheartp, priority=10) packages replace any
+# conflicting base-repo builds, matching the behavior of fedora_install_package.
+sudo dnf install -y --refresh --allowerasing "${packages[@]}"

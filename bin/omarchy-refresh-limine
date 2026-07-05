@@ -2,6 +2,13 @@
 
 # Overwrite the user config for the Limine bootloader and rebuild it.
 
+# Fedora Asahi Remix boots via m1n1/U-Boot + GRUB, not Limine. Skip cleanly on any
+# system without Limine so config-reset flows (omarchy-reinstall-configs) don't abort.
+if [[ ! -f /boot/limine.conf ]] || ! command -v limine-update >/dev/null 2>&1; then
+  echo "Limine not in use on this system; skipping bootloader refresh."
+  exit 0
+fi
+
 if [[ -f /boot/EFI/Linux/omarchy_linux.efi ]] && [[ -f /boot/EFI/Linux/$(cat /etc/machine-id)_linux.efi ]]; then
   echo "Cleanup extra UKI"
   sudo rm -f /boot/EFI/Linux/$(cat /etc/machine-id)_linux.efi

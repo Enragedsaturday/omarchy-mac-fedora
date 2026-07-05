@@ -97,10 +97,15 @@ open_in_editor() {
 
 install() { present_terminal "echo 'Installing $1...'; omarchy-pkg-add $2"; }
 install_and_launch() { present_terminal "echo 'Installing $1...'; omarchy-pkg-add $2 && setsid gtk-launch $3"; }
-install_font() { present_terminal "echo 'Installing $1...'; omarchy-pkg-add $2 && sleep 2 && omarchy-font-set '$3'"; }
+install_font() { present_terminal "echo 'Installing $1...'; omarchy-install-nerd-font $2 && omarchy-font-set '$3'"; }
 install_terminal() { present_terminal "omarchy-install-terminal $1"; }
 aur_install() { present_terminal "echo 'Installing $1 from Fedora repos...'; omarchy-pkg-add $2"; }
 aur_install_and_launch() { present_terminal "echo 'Installing $1 from Fedora repos...'; omarchy-pkg-add $2 && setsid gtk-launch $3"; }
+
+# Flatpak / npm / vendor install helpers for apps not packaged in Fedora repos.
+flatpak_install_and_launch() { present_terminal "echo 'Installing $1 via Flatpak...'; flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo && flatpak install --user -y --noninteractive flathub $2 && setsid gtk-launch $2"; }
+npm_install() { present_terminal "echo 'Installing $1...'; omarchy-npx-install $2 $3"; }
+unavailable_on_arm() { present_terminal "echo '$1 has no aarch64 (Apple Silicon) Linux build and cannot be installed on this Mac.'; sleep 3"; }
 
 # ---- Backs logic -------------------------------------------
 BACK_TO_EXIT=false
@@ -326,7 +331,7 @@ show_install_service_menu() {
   *Dropbox*) present_terminal omarchy-install-dropbox ;;
   *Tailscale*) present_terminal omarchy-install-tailscale ;;
   *NordVPN*) present_terminal omarchy-install-nordvpn ;;
-  *Bitwarden*) install_and_launch "Bitwarden" "bitwarden bitwarden-cli" "bitwarden" ;;
+  *Bitwarden*) flatpak_install_and_launch "Bitwarden" "com.bitwarden.desktop" ;;
   *Chromium*) present_terminal omarchy-install-chromium-google-account ;;
   *) show_install_menu ;;
   esac
@@ -335,11 +340,11 @@ show_install_service_menu() {
 show_install_editor_menu() {
   case $(menu "Install" $'  VSCode\n  Cursor\n  Zed\n  Sublime Text\n  Helix\n  Emacs') in
   *VSCode*) present_terminal omarchy-install-vscode ;;
-  *Cursor*) aur_install_and_launch "Cursor" "cursor-bin" "cursor" ;;
-  *Zed*) install_and_launch "Zed" "zed" "dev.zed.Zed" ;;
-  *Sublime*) aur_install_and_launch "Sublime Text" "sublime-text-4" "sublime_text" ;;
+  *Cursor*) unavailable_on_arm "Cursor" ;;
+  *Zed*) flatpak_install_and_launch "Zed" "dev.zed.Zed" ;;
+  *Sublime*) flatpak_install_and_launch "Sublime Text" "com.sublimetext.three" ;;
   *Helix*) install "Helix" "helix" ;;
-  *Emacs*) install "Emacs" "emacs-wayland" && systemctl --user enable --now emacs.service ;;
+  *Emacs*) install "Emacs" "emacs" ;;
   *) show_install_menu ;;
   esac
 }
@@ -354,22 +359,15 @@ show_install_terminal_menu() {
 }
 
 show_install_ai_menu() {
-  local ollama_pkg
-  ollama_pkg=$(
-    (command -v nvidia-smi &>/dev/null && echo ollama-cuda) ||
-      (command -v rocminfo &>/dev/null && echo ollama-rocm) ||
-      echo ollama
-  )
-
   case $(menu "Install" $'󱚤  Claude Code\n󱚤  Cursor CLI\n󱚤  Gemini\n󱚤  OpenAI Codex\n󱚤  LM Studio\n󱚤  Ollama\n󱚤  Crush\n󱚤  opencode') in
-  *Claude*) aur_install "Claude Code" "claude-code" ;;
-  *Cursor*) aur_install "Cursor CLI" "cursor-cli" ;;
-  *OpenAI*) aur_install "OpenAI Codex" "openai-codex-bin" ;;
-  *Gemini*) aur_install "Gemini" "gemini-cli" ;;
-  *Studio*) aur_install "LM Studio" "lmstudio" ;;
-  *Ollama*) install "Ollama" "$ollama_pkg" ;;
-  *Crush*) aur_install "Crush" "crush-bin" ;;
-  *opencode*) aur_install "opencode" "opencode" ;;
+  *Claude*) npm_install "Claude Code" "@anthropic-ai/claude-code" "claude" ;;
+  *Cursor*) present_terminal "curl https://cursor.com/install -fsS | bash" ;;
+  *OpenAI*) npm_install "OpenAI Codex" "@openai/codex" "codex" ;;
+  *Gemini*) npm_install "Gemini" "@google/gemini-cli" "gemini" ;;
+  *Studio*) unavailable_on_arm "LM Studio" ;;
+  *Ollama*) present_terminal "curl -fsSL https://ollama.com/install.sh | sh" ;;
+  *Crush*) npm_install "Crush" "@charmland/crush" "crush" ;;
+  *opencode*) npm_install "opencode" "opencode-ai" "opencode" ;;
   *) show_install_menu ;;
   esac
 }
@@ -378,8 +376,8 @@ show_install_gaming_menu() {
   case $(menu "Install" $'  Steam\n  RetroArch\n󰍳  Minecraft\n󰖺  Xbox Controller') in
   *Steam*) present_terminal omarchy-install-steam ;;
   *GeForce*) present_terminal omarchy-install-geforce-now ;;
-  *RetroArch*) aur_install_and_launch "RetroArch" "retroarch retroarch-assets libretro libretro-fbneo" "com.libretro.RetroArch.desktop" ;;
-  *Minecraft*) aur_install_and_launch "Minecraft" "minecraft-launcher" "minecraft-launcher" ;;
+  *RetroArch*) flatpak_install_and_launch "RetroArch" "org.libretro.RetroArch" ;;
+  *Minecraft*) flatpak_install_and_launch "Minecraft" "com.mojang.Minecraft" ;;
   *Xbox*) present_terminal omarchy-install-xbox-controllers ;;
   *) show_install_menu ;;
   esac
@@ -396,11 +394,11 @@ show_install_style_menu() {
 
 show_install_font_menu() {
   case $(menu "Install" $'  Meslo LG Mono\n  Fira Code\n  Victor Code\n  Bistream Vera Mono\n  Iosevka' "-w 350") in
-  *Meslo*) install_font "Meslo LG Mono" "ttf-meslo-nerd" "MesloLGL Nerd Font" ;;
-  *Fira*) install_font "Fira Code" "ttf-firacode-nerd" "FiraCode Nerd Font" ;;
-  *Victor*) install_font "Victor Code" "ttf-victor-mono-nerd" "VictorMono Nerd Font" ;;
-  *Bistream*) install_font "Bistream Vera Code" "ttf-bitstream-vera-mono-nerd" "BitstromWera Nerd Font" ;;
-  *Iosevka*) install_font "Iosevka" "ttf-iosevka-nerd" "Iosevka Nerd Font Mono" ;;
+  *Meslo*) install_font "Meslo LG Mono" "Meslo" "MesloLGL Nerd Font" ;;
+  *Fira*) install_font "Fira Code" "FiraCode" "FiraCode Nerd Font" ;;
+  *Victor*) install_font "Victor Code" "VictorMono" "VictorMono Nerd Font" ;;
+  *Bistream*) install_font "Bistream Vera Code" "BitstreamVeraSansMono" "BitstromWera Nerd Font" ;;
+  *Iosevka*) install_font "Iosevka" "Iosevka" "Iosevka Nerd Font Mono" ;;
   *) show_install_menu ;;
   esac
 }

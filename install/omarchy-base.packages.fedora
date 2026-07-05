@@ -8,6 +8,8 @@ hypridle
 hyprlock
 hyprsunset
 hyprland-guiutils
+hyprpicker
+uwsm
 waybar
 mako
 swayosd
@@ -21,9 +23,10 @@ xdg-desktop-portal-hyprland
 xdg-desktop-portal-gtk
 xdg-user-dirs
 qt5-qtwayland
+qt6-qtwayland
+kvantum-qt5
 chromium
 yaru-icon-theme
-yaru-gtk2-theme
 yaru-gtk3-theme
 yaru-gtk4-theme
 yaru-gtksourceview-theme
@@ -31,6 +34,7 @@ yaru-gtksourceview-theme
 # Terminal
 xdg-terminal-exec
 alacritty
+ghostty
 starship
 eza
 btop
@@ -38,11 +42,15 @@ fzf
 ripgrep
 bat
 fd-find
+du-dust
 zoxide
 fastfetch
 jq
 htop
 tmux
+tldr
+xmlstarlet
+unzip
 
 # Development
 neovim
@@ -50,9 +58,12 @@ git
 cargo
 clang
 llvm
-java-21-openjdk
+java-latest-openjdk
 luarocks
 gh
+nodejs22
+nodejs22-npm
+tree-sitter-cli
 
 # Containers
 moby-engine
@@ -69,6 +80,11 @@ kdenlive
 evince
 nautilus
 nautilus-python
+sushi
+ffmpegthumbnailer
+gvfs-mtp
+gvfs-smb
+xournalpp
 gnome-calculator
 
 # System Utilities
@@ -79,6 +95,12 @@ pavucontrol
 gum
 plymouth
 cups
+cups-browsed
+cups-filters
+cups-pdf
+system-config-printer
+avahi
+nss-mdns
 util-linux-script
 libqalculate
 qalculate
@@ -109,6 +131,8 @@ google-noto-emoji-fonts
 google-noto-color-emoji-fonts
 cascadia-mono-nf-fonts
 jetbrains-mono-fonts
+fontawesome-6-free-fonts
+fontawesome-6-brands-fonts
 
 # Input Methods
 fcitx5

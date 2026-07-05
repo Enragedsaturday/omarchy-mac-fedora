@@ -1,0 +1,45 @@
+#!/bin/bash
+
+# Install a Nerd Font from the ryanoasis/nerd-fonts releases into the user's font
+# directory. Fedora does not package the patched Nerd Font variants, so this is the
+# aarch64-friendly equivalent of Arch's ttf-*-nerd packages.
+#
+# Usage: omarchy-install-nerd-font <ReleaseName>
+#   e.g. omarchy-install-nerd-font FiraCode
+
+set -euo pipefail
+
+font="${1:-}"
+if [[ -z "$font" ]]; then
+  echo "Usage: omarchy-install-nerd-font <NerdFontReleaseName>" >&2
+  exit 1
+fi
+
+dest="$HOME/.local/share/fonts/$font"
+if compgen -G "$dest/*.ttf" >/dev/null 2>&1 || compgen -G "$dest/*.otf" >/dev/null 2>&1; then
+  echo "$font Nerd Font already installed."
+  exit 0
+fi
+
+for tool in curl unzip fc-cache; do
+  if ! command -v "$tool" >/dev/null 2>&1; then
+    echo "Error: '$tool' is required but not installed." >&2
+    exit 1
+  fi
+done
+
+url="https://github.com/ryanoasis/nerd-fonts/releases/latest/download/${font}.zip"
+tmp="$(mktemp -d)"
+trap 'rm -rf "$tmp"' EXIT
+
+echo "Downloading ${font} Nerd Font..."
+if ! curl -fL "$url" -o "$tmp/${font}.zip"; then
+  echo "Error: failed to download ${font} Nerd Font from $url" >&2
+  exit 1
+fi
+
+mkdir -p "$dest"
+unzip -o "$tmp/${font}.zip" -x "*.md" "LICENSE*" -d "$dest" >/dev/null
+fc-cache -f "$dest" >/dev/null
+
+echo "Installed ${font} Nerd Font to $dest"

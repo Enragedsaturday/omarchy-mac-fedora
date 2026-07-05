@@ -3,7 +3,8 @@
 # Install the NordVPN service with optional GUI.
 
 echo "Installing NordVPN..."
-omarchy-pkg-aur-add nordvpn-bin
+# NordVPN's official Linux installer supports aarch64 and sets up its own repo.
+sh <(curl -sSf https://downloads.nordcdn.com/apps/linux/install.sh)
 
 echo "Enabling NordVPN daemon..."
 sudo systemctl enable --now nordvpnd

@@ -3,7 +3,22 @@
 # Install VSCode and configure it to use the gnome-libsecret password store, not to update automatically, and to use the current Omarchy theme.
 
 echo "Installing VSCode..."
-omarchy-pkg-add visual-studio-code-bin
+
+# Microsoft's official Fedora repo ships an aarch64 build of `code`.
+if ! rpm -q code >/dev/null 2>&1; then
+  sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
+  sudo tee /etc/yum.repos.d/vscode.repo >/dev/null <<'EOF'
+[code]
+name=Visual Studio Code
+baseurl=https://packages.microsoft.com/yumrepos/vscode
+enabled=1
+autorefresh=1
+type=rpm-md
+gpgcheck=1
+gpgkey=https://packages.microsoft.com/keys/microsoft.asc
+EOF
+  sudo dnf install -y code
+fi
 
 mkdir -p ~/.vscode ~/.config/Code/User
 

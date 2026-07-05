@@ -1,10 +1,19 @@
 #!/bin/bash
 
-# Install and start the Dropbox service. Must then be authenticated via the web.
+# The official Dropbox Linux client is x86_64-only — there is no aarch64 (Apple
+# Silicon) build, so it cannot run on Fedora Asahi Remix.
 
-echo "Installing all dependencies..."
-omarchy-pkg-add dropbox dropbox-cli libappindicator-gtk3 python-gpgme nautilus-dropbox
+echo "Dropbox does not ship an aarch64 Linux client, so it can't be installed on this Mac."
+echo
+echo "Working alternative: Maestral, an open-source Dropbox client that runs on aarch64:"
+echo "  pipx install maestral        # CLI + sync daemon"
+echo "  pipx install maestral-gui    # optional tray GUI"
+echo "Then run 'maestral start' and authenticate via the web."
+echo
+gum confirm "Install Maestral now via pipx?" || exit 0
 
-echo "Starting Dropbox..."
-uwsm-app -- dropbox-cli start &>/dev/null &
-echo "See Dropbox icon behind  hover tray in top right and right-click for setup."
+if ! command -v pipx >/dev/null 2>&1; then
+  omarchy-pkg-add pipx
+fi
+pipx install maestral
+echo "Run 'maestral start' to begin syncing."
